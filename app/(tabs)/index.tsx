@@ -1,70 +1,118 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import { StyleSheet, SafeAreaView, View, TextInput, Text, TouchableOpacity } from 'react-native';
+import { useState } from 'react';
+import { getNutritionDetails } from '../api/edamam.js';
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
 
 export default function HomeScreen() {
+    const [ingredients, setIngredients] = useState('');
+    const [nutritionData, setNutritionData] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+
+    const fetchNutritionDetails = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const data = await getNutritionDetails(ingredients.split(','));
+            setNutritionData(data);
+        } catch (err) {
+            setError('Failed to fetch nutrition details.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({ ios: 'cmd + d', android: 'cmd + m' })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <SafeAreaView style={styles.container}>
+        <View style={styles.container}>
+            <Text style={styles.label}>Enter ingredients separated by a comma (,):</Text>
+            <TextInput
+                style={styles.input}
+                multiline
+                value={ingredients}
+                onChangeText={setIngredients}
+            />
+            <TouchableOpacity
+                onPress={fetchNutritionDetails}
+            >
+                <Text>Get Nutrition Details</Text>
+            </TouchableOpacity>
+            {loading && <Text>Loading...</Text>}
+            {error && <Text style={styles.error}>{error}</Text>}
+            {nutritionData && (
+                <View style={styles.results}>
+                <Text>Calories: {nutritionData.calories}</Text>
+                <Text>Weight: {nutritionData.totalWeight}</Text>
+                {/* Display more nutrition data as needed */}
+                </View>
+            )}
+        </View>
+        {/* Search Box */}
+        {/* <View style={styles.inputContainer}>
+            <TextInput
+                placeholder='Search Food'
+                editable
+                multiline
+                numberOfLines={4}
+                maxLength={40}
+                value={ingredients}
+                onChangeText={text => setIngredients(text)}
+                style={styles.input}
+            />
+        </View>
+        <TouchableOpacity
+            style={styles.buttonContainer}
+            onPress={fetchNutritionDetails}
+        >
+            <Text style={styles.buttonText}>Analyze</Text>
+        </TouchableOpacity> */}
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+//   container: {
+//     flex: 1,
+//     alignItems: 'center',
+//     justifyContent: 'center'
+//   },
+//   inputContainer: {
+//     width: '80%',
+//     backgroundColor: 'white',
+//     borderRadius: 10,
+//   },
+//   input: {
+//     padding: 10
+//   },
+//   buttonContainer: {
+//     width: '50%',
+//     alignItems: 'center',
+//     justifyContent: 'center',
+//     marginTop: 20,
+//     backgroundColor: '#A1CEDC',
+//     borderRadius: 10,
+//   },
+//   buttonText: {
+//     padding: 10
+//   },
+container: {
+    padding: 20,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  label: {
+    fontSize: 16,
+    marginBottom: 10,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  input: {
+    height: 100,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    marginBottom: 20,
+    padding: 10,
+  },
+  error: {
+    color: 'red',
+  },
+  results: {
+    marginTop: 20,
   },
 });
