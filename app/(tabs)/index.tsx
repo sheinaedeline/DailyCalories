@@ -15,6 +15,7 @@ export default function HomeScreen() {
         try {
             const data = await getNutritionDetails(ingredients.split(','));
             setNutritionData(data);
+            console.log(data.totalNutrients);
         } catch (err) {
             setError('Failed to fetch nutrition details.');
         } finally {
@@ -23,7 +24,8 @@ export default function HomeScreen() {
     };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.pageContainer}>
+        {/* Search Box */}
         <View style={styles.container}>
             <Text style={styles.label}>Enter ingredients separated by a comma (,):</Text>
             <TextInput
@@ -33,6 +35,7 @@ export default function HomeScreen() {
                 onChangeText={setIngredients}
             />
             <TouchableOpacity
+                style={styles.buttonContainer}
                 onPress={fetchNutritionDetails}
             >
                 <Text>Get Nutrition Details</Text>
@@ -41,61 +44,39 @@ export default function HomeScreen() {
             {error && <Text style={styles.error}>{error}</Text>}
             {nutritionData && (
                 <View style={styles.results}>
-                <Text>Calories: {nutritionData.calories}</Text>
-                <Text>Weight: {nutritionData.totalWeight}</Text>
+                <Text style={styles.title}>Total Nutrition Details</Text>
+                <Text>Calories: {nutritionData.calories}kcal</Text>
+                <Text>Protein: {nutritionData.totalNutrients.PROCNT.quantity}g</Text>
+                <Text>Carbohydrate: {nutritionData.totalNutrients.CHOCDF.quantity}g</Text>
+                <Text>Fats: {nutritionData.totalNutrients.FAT.quantity}g</Text>
+                <Text>Weight: {nutritionData.totalWeight}g</Text>
                 {/* Display more nutrition data as needed */}
                 </View>
             )}
         </View>
-        {/* Search Box */}
-        {/* <View style={styles.inputContainer}>
-            <TextInput
-                placeholder='Search Food'
-                editable
-                multiline
-                numberOfLines={4}
-                maxLength={40}
-                value={ingredients}
-                onChangeText={text => setIngredients(text)}
-                style={styles.input}
-            />
-        </View>
-        <TouchableOpacity
-            style={styles.buttonContainer}
-            onPress={fetchNutritionDetails}
-        >
-            <Text style={styles.buttonText}>Analyze</Text>
-        </TouchableOpacity> */}
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     alignItems: 'center',
-//     justifyContent: 'center'
-//   },
-//   inputContainer: {
-//     width: '80%',
-//     backgroundColor: 'white',
-//     borderRadius: 10,
-//   },
-//   input: {
-//     padding: 10
-//   },
-//   buttonContainer: {
-//     width: '50%',
-//     alignItems: 'center',
-//     justifyContent: 'center',
-//     marginTop: 20,
-//     backgroundColor: '#A1CEDC',
-//     borderRadius: 10,
-//   },
-//   buttonText: {
-//     padding: 10
-//   },
-container: {
+  pageContainer: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  buttonContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#A1CEDC',
+    borderRadius: 5,
+    padding: 5,
+  },
+  title:{
+    fontStyle: 'bold'
+  },
+  buttonText: {
+    padding: 10
+  },
+  container: {
     padding: 20,
   },
   label: {
